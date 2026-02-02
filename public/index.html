@@ -449,6 +449,34 @@
       .cell::after{ display:none; }
       .inner::before{ display:none; }
     }
+	
+	/* --- Task indicator dot (top-right) --- */
+	.dot{
+	  position:absolute;
+	  top:8px;
+	  right:8px;
+	  width:9px;
+	  height:9px;
+	  border-radius:999px;
+	  pointer-events:none;
+	  z-index:2;
+
+	  /* чтобы выглядел как “стеклянная бусина” */
+	  border: 1px solid rgba(255,255,255,.70);
+	  box-shadow:
+		0 6px 14px rgba(15,23,42,.14),
+		inset 0 1px 0 rgba(255,255,255,.55);
+	}
+
+	/* цвета (зелёный максимально похож на твой скрин) */
+	.dot.green{  background:#22c55e; }  /* 1..3 */
+	.dot.yellow{ background:#facc15; }  /* 4..5 */
+	.dot.red{    background:#ef4444; }  /* 6..10 */
+	.dot.black{  background:#0f172a; }  /* >10 */
+	
+	
+	
+	
   </style>
 </head>
 
@@ -624,6 +652,57 @@
       return new Date(year, month + 1, 0).getDate();
     }
 
+
+	function getTaskCount(dateKey){
+	  // 1) основной вариант (рекомендуемый)
+	  const direct = localStorage.getItem(`glass_tasks_${dateKey}`);
+	  const n1 = parseCountFromRaw(direct);
+	  if (n1 !== null) return n1;
+
+	  // 2) запасной вариант: один общий объект { "YYYY-MM-DD": [...] }
+	  const map = localStorage.getItem("glass_calendar_tasks");
+	  if(map){
+		try{
+		  const obj = JSON.parse(map);
+		  const v = obj?.[dateKey];
+		  if(Array.isArray(v)) return v.length;
+		  if(v && Array.isArray(v.tasks)) return v.tasks.length;
+		  if(v && typeof v.count === "number") return v.count;
+		}catch{}
+	  }
+
+	  return 0;
+	}
+
+	function parseCountFromRaw(raw){
+	  if(!raw) return null;
+	  try{
+		const data = JSON.parse(raw);
+
+		// массив задач
+		if(Array.isArray(data)) return data.length;
+
+		// объект с tasks
+		if(data && Array.isArray(data.tasks)) return data.tasks.length;
+
+		// объект с count
+		if(data && typeof data.count === "number") return data.count;
+
+		return 0;
+	  }catch{
+		return 0;
+	  }
+	}
+
+	function dotClassForCount(n){
+	  if(n <= 0) return null;
+	  if(n <= 3) return "green";
+	  if(n <= 5) return "yellow";
+	  if(n <= 10) return "red";
+	  return "black";
+	}
+
+
     function render(){
 	  selectedCellEl = null;
       titleEl.textContent = `${monthNames[view.month]} ${view.year}`;
@@ -650,6 +729,15 @@
         if(k === view.selectedKey){
 		  cell.classList.add("selected");
 		  selectedCellEl = cell; // чтобы телефон знал, что сейчас выбрано
+		}
+
+		const count = getTaskCount(k);
+		const cls = dotClassForCount(count);
+		if(cls){
+		  const dot = document.createElement("span");
+		  dot.className = `dot ${cls}`;
+		  dot.title = `${count} задач`; // optional
+		  cell.appendChild(dot);
 		}
 
 
