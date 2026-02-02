@@ -653,46 +653,18 @@
     }
 
 
+	const TASKS_STORE_KEY = "glass_tasks_v1"; // как в day.html
+
 	function getTaskCount(dateKey){
-	  // 1) основной вариант (рекомендуемый)
-	  const direct = localStorage.getItem(`glass_tasks_${dateKey}`);
-	  const n1 = parseCountFromRaw(direct);
-	  if (n1 !== null) return n1;
-
-	  // 2) запасной вариант: один общий объект { "YYYY-MM-DD": [...] }
-	  const map = localStorage.getItem("glass_calendar_tasks");
-	  if(map){
-		try{
-		  const obj = JSON.parse(map);
-		  const v = obj?.[dateKey];
-		  if(Array.isArray(v)) return v.length;
-		  if(v && Array.isArray(v.tasks)) return v.tasks.length;
-		  if(v && typeof v.count === "number") return v.count;
-		}catch{}
-	  }
-
-	  return 0;
-	}
-
-	function parseCountFromRaw(raw){
-	  if(!raw) return null;
 	  try{
-		const data = JSON.parse(raw);
-
-		// массив задач
-		if(Array.isArray(data)) return data.length;
-
-		// объект с tasks
-		if(data && Array.isArray(data.tasks)) return data.tasks.length;
-
-		// объект с count
-		if(data && typeof data.count === "number") return data.count;
-
-		return 0;
+		const all = JSON.parse(localStorage.getItem(TASKS_STORE_KEY) || "{}");
+		const arr = all?.[dateKey];
+		return Array.isArray(arr) ? arr.length : 0;
 	  }catch{
 		return 0;
 	  }
 	}
+
 
 	function dotClassForCount(n){
 	  if(n <= 0) return null;
