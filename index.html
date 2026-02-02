@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Glass Calendar (minimal)</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root{
+      /* ---- palette (white + calm lime) ---- */
+      --bgA: #fbfcff;
+      --bgB: #f3f8ff;
+
+      --lime: 163 230 53;      /* lime-400-ish */
+      --mint: 110 231 183;     /* emerald/mint */
+      --ink: 15 23 42;         /* slate-900 */
+
+      /* Glass materials */
+      --glassTop: rgba(255,255,255,.42);
+      --glassBottom: rgba(255,255,255,.18);
+      --hairline: rgba(15,23,42,.10);
+      --hairline2: rgba(15,23,42,.14);
+
+      --shadowBig: 0 26px 90px rgba(15,23,42,.12);
+      --shadowMid: 0 14px 40px rgba(15,23,42,.10);
+      --shadowSm: 0 8px 18px rgba(15,23,42,.10);
+
+      --radius: 22px;
+      --cellRadius: 16px;
+
+      --text: rgb(var(--ink));
+      --muted: rgba(15,23,42,.55);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+
+      /* calm white background with lime glass vibe */
+      background:
+        radial-gradient(900px 520px at 15% 10%, rgba(var(--lime), .16), transparent 58%),
+        radial-gradient(820px 520px at 88% 14%, rgba(var(--mint), .14), transparent 58%),
+        radial-gradient(900px 650px at 42% 94%, rgba(148,163,184,.20), transparent 58%),
+        linear-gradient(180deg, var(--bgA), var(--bgB));
+    }
+
+    .wrap{ width:min(720px, 100%); }
+
+    /* ---- main glass panel ---- */
+    .glass{
+      position:relative;
+      border-radius: var(--radius);
+      border:1px solid var(--hairline);
+      background: linear-gradient(180deg, var(--glassTop), var(--glassBottom));
+      box-shadow: var(--shadowBig);
+      overflow:hidden;
+
+      /* iOS-like material */
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+    }
+
+    /* soft highlight + subtle noise illusion */
+    .glass::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(520px 240px at 18% 10%, rgba(255,255,255,.70), transparent 62%),
+        radial-gradient(460px 260px at 86% 0%, rgba(255,255,255,.45), transparent 62%),
+        radial-gradient(380px 260px at 70% 100%, rgba(var(--lime), .10), transparent 65%);
+      opacity:.75;
+      pointer-events:none;
+    }
+    .glass::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
+      mix-blend-mode: overlay;
+      opacity:.35;
+      pointer-events:none;
+    }
+
+    .inner{
+      position:relative;
+      padding:18px;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:2px 2px 14px 2px;
+    }
+
+    .monthTitle{
+      font-size:18px;
+      font-weight:650;
+      letter-spacing:.2px;
+      line-height:1;
+      user-select:none;
+    }
+
+    .nav{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .iconBtn{
+      width:42px;
+      height:42px;
+      border-radius: 14px;
+      border:1px solid var(--hairline2);
+      background: linear-gradient(180deg, rgba(255,255,255,.36), rgba(255,255,255,.18));
+      box-shadow: var(--shadowSm);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease, box-shadow .14s ease;
+      backdrop-filter: blur(14px) saturate(170%);
+      -webkit-backdrop-filter: blur(14px) saturate(170%);
+    }
+    .iconBtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(var(--lime), .28);
+      box-shadow: 0 12px 26px rgba(15,23,42,.12);
+    }
+    .iconBtn:active{ transform: translateY(0) scale(.98); }
+
+    .iconBtn svg{ width:18px; height:18px; opacity:.82; }
+
+    .dow{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:10px;
+      padding:4px 0 10px 0;
+    }
+    .dow div{
+      text-align:center;
+      font-size:12px;
+      color: var(--muted);
+      user-select:none;
+      letter-spacing:.2px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:10px;
+    }
+
+    /* ---- day cells: glass ---- */
+    .cell{
+      aspect-ratio: 1 / 1;
+      border-radius: var(--cellRadius);
+      border:1px solid rgba(15,23,42,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.12));
+      box-shadow: 0 8px 18px rgba(15,23,42,.08);
+      position:relative;
+      overflow:hidden;
+
+      backdrop-filter: blur(16px) saturate(175%);
+      -webkit-backdrop-filter: blur(16px) saturate(175%);
+
+      transition:
+        transform .16s ease,
+        box-shadow .16s ease,
+        border-color .16s ease;
+    }
+
+    /* inner highlight sheen */
+    .cell::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(160px 120px at 30% 22%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(140px 120px at 75% 85%, rgba(var(--lime), .08), transparent 65%);
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    /* darkening overlay (used for hover/selected) */
+    .cell::after{
+      content:"";
+      position:absolute; inset:0;
+      background: rgba(15,23,42,0);
+      pointer-events:none;
+      transition: background .16s ease;
+    }
+
+    .cell.empty{
+      background: transparent;
+      border: 1px dashed rgba(15,23,42,.08);
+      box-shadow:none;
+      opacity:.55;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+    }
+    .cell.empty::before,
+    .cell.empty::after{ display:none; }
+
+    .dayBtn{
+      width:100%;
+      height:100%;
+      border:0;
+      background: transparent;
+      color: var(--text);
+      font-size:14px;
+      font-weight:650;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      padding:0;
+      border-radius: var(--cellRadius);
+      position:relative;
+      z-index:1;
+      transition: transform .16s ease;
+      user-select:none;
+    }
+
+    /* Hover glass: slightly darker + lift */
+    .cell:not(.empty):hover{
+      transform: translateY(-2px);
+      border-color: rgba(var(--lime), .22);
+      box-shadow: 0 18px 42px rgba(15,23,42,.12);
+    }
+    .cell:not(.empty):hover::after{
+      background: rgba(15,23,42,.07);
+    }
+
+    /* Today: subtle lime glass accent */
+    .cell.today{
+      border-color: rgba(var(--lime), .30);
+      box-shadow: 0 12px 28px rgba(var(--lime), .12), 0 10px 22px rgba(15,23,42,.08);
+    }
+    .cell.today::before{
+      opacity:.68;
+      background:
+        radial-gradient(170px 130px at 30% 22%, rgba(255,255,255,.60), transparent 60%),
+        radial-gradient(170px 130px at 70% 75%, rgba(var(--lime), .14), transparent 62%);
+    }
+
+    /* Selected: glass darkens noticeably */
+    .cell.selected{
+      border-color: rgba(var(--lime), .45);
+      box-shadow: 0 18px 48px rgba(15,23,42,.16), 0 14px 28px rgba(var(--lime), .10);
+    }
+    .cell.selected::after{
+      background: rgba(15,23,42,.14);
+    }
+
+    /* Today + Selected: keep lime vibe but stronger */
+    .cell.today.selected{
+      border-color: rgba(var(--lime), .55);
+    }
+    .cell.today.selected::after{
+      background: rgba(15,23,42,.18);
+    }
+
+    /* Make hover also work for today (already does), but slightly stronger */
+    .cell.today:hover{
+      border-color: rgba(var(--lime), .42);
+    }
+
+    @media (max-width: 480px){
+      .inner{ padding:14px; }
+      .grid, .dow{ gap:8px; }
+      .iconBtn{ width:40px; height:40px; border-radius: 13px; }
+      .monthTitle{ font-size:16px; }
+      .dayBtn{ font-size:13px; }
+    }
+
+    /* Fallback when backdrop-filter unsupported */
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+      .glass, .iconBtn, .cell{
+        background: rgba(255,255,255,.85);
+      }
+      .cell::after{ display:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="glass">
+      <div class="inner">
+        <div class="top">
+          <div class="monthTitle" id="monthTitle">—</div>
+          <div class="nav">
+            <button class="iconBtn" id="prevBtn" aria-label="Назад">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <button class="iconBtn" id="nextBtn" aria-label="Вперёд">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 6l6 6-6 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="dow" aria-hidden="true">
+          <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    tg?.ready();
+    tg?.expand();
+    const monthNames = [
+      "Январь","Февраль","Март","Апрель","Май","Июнь",
+      "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"
+    ];
+
+    const gridEl = document.getElementById("grid");
+    const titleEl = document.getElementById("monthTitle");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const today = new Date();
+    const todayKey = keyOf(today);
+
+    let view = loadState() || {
+      year: today.getFullYear(),
+      month: today.getMonth(),
+      selectedKey: todayKey
+    };
+
+    function keyOf(d){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function saveState(){
+      localStorage.setItem("glass_calendar_state", JSON.stringify(view));
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem("glass_calendar_state");
+        if(!raw) return null;
+        const v = JSON.parse(raw);
+        if(typeof v?.year !== "number" || typeof v?.month !== "number") return null;
+        if(typeof v?.selectedKey !== "string") v.selectedKey = todayKey;
+        return v;
+      }catch{ return null; }
+    }
+
+    function mondayIndex(jsDay){
+      return (jsDay + 6) % 7; // JS: 0=Sun..6=Sat -> 0=Mon..6=Sun
+    }
+
+    function daysInMonth(year, month){
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function render(){
+      titleEl.textContent = `${monthNames[view.month]} ${view.year}`;
+      gridEl.innerHTML = "";
+
+      const first = new Date(view.year, view.month, 1);
+      const offset = mondayIndex(first.getDay());
+      const dim = daysInMonth(view.year, view.month);
+
+      for(let i=0;i<offset;i++){
+        gridEl.appendChild(makeEmptyCell());
+      }
+
+      for(let day=1; day<=dim; day++){
+        const d = new Date(view.year, view.month, day);
+        const k = keyOf(d);
+
+        const cell = document.createElement("div");
+        cell.className = "cell";
+
+        if(k === todayKey) cell.classList.add("today");
+        if(k === view.selectedKey) cell.classList.add("selected");
+
+        const btn = document.createElement("button");
+        btn.className = "dayBtn";
+        btn.type = "button";
+        btn.textContent = day;
+        btn.setAttribute("data-key", k);
+
+        btn.addEventListener("click", () => {
+          view.selectedKey = k;
+          saveState();
+          render();
+
+          window.location.href = `day.html?date=${encodeURIComponent(k)}`; //открывает день
+
+          // Telegram Mini App hook (optional):
+          // if (window.Telegram?.WebApp) Telegram.WebApp.sendData(JSON.stringify({ selected: k }));
+        });
+
+        cell.appendChild(btn);
+        gridEl.appendChild(cell);
+      }
+
+      const totalCells = offset + dim;
+      const rest = (7 - (totalCells % 7)) % 7;
+      for(let i=0;i<rest;i++){
+        gridEl.appendChild(makeEmptyCell());
+      }
+    }
+
+    function makeEmptyCell(){
+      const c = document.createElement("div");
+      c.className = "cell empty";
+      c.setAttribute("aria-hidden","true");
+      return c;
+    }
+
+    prevBtn.addEventListener("click", () => {
+      view.month--;
+      if(view.month < 0){ view.month = 11; view.year--; }
+      saveState();
+      render();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      view.month++;
+      if(view.month > 11){ view.month = 0; view.year++; }
+      saveState();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
