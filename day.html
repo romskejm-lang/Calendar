@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Day</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root{
+      --bgA:#fbfcff; --bgB:#f3f8ff;
+      --lime:163 230 53; --mint:110 231 183; --ink:15 23 42;
+      --glassTop: rgba(255,255,255,.46);
+      --glassBottom: rgba(255,255,255,.18);
+      --hairline: rgba(15,23,42,.10);
+      --hairline2: rgba(15,23,42,.14);
+      --shadowBig: 0 26px 90px rgba(15,23,42,.12);
+      --shadowSm: 0 8px 18px rgba(15,23,42,.10);
+      --radius: 22px;
+      --text: rgb(var(--ink));
+      --muted: rgba(15,23,42,.55);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:
+        radial-gradient(900px 520px at 15% 10%, rgba(var(--lime), .16), transparent 58%),
+        radial-gradient(820px 520px at 88% 14%, rgba(var(--mint), .14), transparent 58%),
+        radial-gradient(900px 650px at 42% 94%, rgba(148,163,184,.20), transparent 58%),
+        linear-gradient(180deg, var(--bgA), var(--bgB));
+    }
+
+    .wrap{ width:min(720px, 100%); }
+
+    .glass{
+      position:relative;
+      border-radius: var(--radius);
+      border:1px solid var(--hairline);
+      background: linear-gradient(180deg, var(--glassTop), var(--glassBottom));
+      box-shadow: var(--shadowBig);
+      overflow:hidden;
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+    }
+
+    .glass::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(520px 240px at 18% 10%, rgba(255,255,255,.70), transparent 62%),
+        radial-gradient(460px 260px at 86% 0%, rgba(255,255,255,.45), transparent 62%),
+        radial-gradient(380px 260px at 70% 100%, rgba(var(--lime), .10), transparent 65%);
+      opacity:.75;
+      pointer-events:none;
+    }
+
+    .inner{ position:relative; padding:16px; }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:2px 0 14px 0;
+    }
+
+    .dateTitle{
+      font-size:16px;
+      font-weight:800;
+      letter-spacing:.2px;
+      user-select:none;
+      flex:1;
+      text-align:center;
+    }
+
+    .iconBtn{
+      width:42px; height:42px;
+      border-radius: 14px;
+      border:1px solid var(--hairline2);
+      background: linear-gradient(180deg, rgba(255,255,255,.36), rgba(255,255,255,.18));
+      box-shadow: var(--shadowSm);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
+      backdrop-filter: blur(14px) saturate(170%);
+      -webkit-backdrop-filter: blur(14px) saturate(170%);
+    }
+    .iconBtn:hover{ transform: translateY(-1px); border-color: rgba(var(--lime), .28); box-shadow: 0 12px 26px rgba(15,23,42,.12); }
+    .iconBtn:active{ transform: translateY(0) scale(.98); }
+    .iconBtn svg{ width:18px; height:18px; opacity:.82; }
+
+    .row{ display:flex; gap:10px; align-items:center; }
+
+    .input{
+      flex:1;
+      height:44px;
+      border-radius: 14px;
+      border:1px solid rgba(15,23,42,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.12));
+      backdrop-filter: blur(16px) saturate(175%);
+      -webkit-backdrop-filter: blur(16px) saturate(175%);
+      padding:0 14px;
+      font-size:14px;
+      outline:none;
+    }
+
+    .btn{
+      height:44px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.30), rgba(255,255,255,.14));
+      box-shadow: var(--shadowSm);
+      cursor:pointer;
+      font-weight:800;
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+      backdrop-filter: blur(16px) saturate(175%);
+      -webkit-backdrop-filter: blur(16px) saturate(175%);
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(var(--lime), .22); box-shadow: 0 12px 26px rgba(15,23,42,.12); }
+    .btn:active{ transform: translateY(0) scale(.98); }
+
+    .list{
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(15,23,42,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
+      backdrop-filter: blur(16px) saturate(175%);
+      -webkit-backdrop-filter: blur(16px) saturate(175%);
+      transition: transform .14s ease, border-color .14s ease;
+      overflow:hidden;
+    }
+    .item:hover{ transform: translateY(-1px); border-color: rgba(var(--lime), .18); }
+
+    .check{
+      width:22px; height:22px;
+      border-radius:8px;
+      border:1px solid rgba(15,23,42,.22);
+      background: rgba(255,255,255,.35);
+      display:grid; place-items:center;
+      cursor:pointer;
+      flex: 0 0 auto;
+    }
+    .check svg{ width:14px; height:14px; opacity:0; }
+    .item.done .check svg{ opacity:.9; }
+
+    .text{
+      flex:1;
+      font-size:14px;
+      line-height:1.25;
+      word-break:break-word;
+    }
+    .item.done .text{
+      opacity:.55;
+      text-decoration: line-through;
+    }
+
+    .del{
+      width:38px; height:38px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.35);
+      cursor:pointer;
+      display:grid; place-items:center;
+      flex: 0 0 auto;
+      font-weight:800;
+    }
+
+    .footer{
+      margin-top:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+    .hint{
+      font-size:12px;
+      color: var(--muted);
+      user-select:none;
+    }
+
+    @media (max-width: 480px){
+      .iconBtn{ width:40px; height:40px; border-radius:13px; }
+      .dateTitle{ font-size:15px; }
+      .btn{ padding:0 12px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="glass">
+      <div class="inner">
+        <div class="top">
+          <button class="iconBtn" id="backBtn" aria-label="Назад">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+
+          <div class="dateTitle" id="dateTitle">—</div>
+
+          <!-- Если нажать — уйдёт в бота и мини-апп закроется -->
+          <button class="iconBtn" id="sendBtn" aria-label="Отправить в бота">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13"/>
+              <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="row">
+          <input class="input" id="taskInput" placeholder="Задача…" />
+          <button class="btn" id="addBtn">+</button>
+        </div>
+
+        <div class="list" id="list"></div>
+
+        <div class="footer">
+          <div class="hint" id="hint">0 задач</div>
+          <button class="btn" id="clearBtn">Очистить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    tg?.ready();
+    tg?.expand();
+
+    const STORE_KEY = "glass_tasks_v1"; // { "YYYY-MM-DD": [ {id,text,done}, ... ] }
+
+    const qs = new URLSearchParams(location.search);
+    const dateKey = qs.get("date") || todayKey();
+
+    const dateTitle = document.getElementById("dateTitle");
+    const listEl = document.getElementById("list");
+    const hintEl = document.getElementById("hint");
+    const taskInput = document.getElementById("taskInput");
+
+    const backBtn = document.getElementById("backBtn");
+    const sendBtn = document.getElementById("sendBtn");
+    const addBtn = document.getElementById("addBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    backBtn.addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    function todayKey(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+
+    function formatRuDate(k){
+      const [y,m,d] = k.split("-").map(Number);
+      const dd = new Date(y, m-1, d);
+      const months = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+      return `${d} ${months[dd.getMonth()]} ${y}`;
+    }
+
+    function loadAll(){
+      try { return JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); }
+      catch { return {}; }
+    }
+
+    function saveAll(obj){
+      localStorage.setItem(STORE_KEY, JSON.stringify(obj));
+    }
+
+    function loadTasks(k){
+      const all = loadAll();
+      return Array.isArray(all[k]) ? all[k] : [];
+    }
+
+    function saveTasks(k, tasks){
+      const all = loadAll();
+      all[k] = tasks;
+      saveAll(all);
+    }
+
+    let tasks = loadTasks(dateKey);
+
+    function render(){
+      dateTitle.textContent = formatRuDate(dateKey);
+      listEl.innerHTML = "";
+
+      for(const t of tasks){
+        const row = document.createElement("div");
+        row.className = "item" + (t.done ? " done" : "");
+
+        const check = document.createElement("div");
+        check.className = "check";
+        check.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+        `;
+        check.addEventListener("click", () => {
+          t.done = !t.done;
+          saveTasks(dateKey, tasks);
+          render();
+        });
+
+        const text = document.createElement("div");
+        text.className = "text";
+        text.textContent = t.text;
+
+        const del = document.createElement("button");
+        del.className = "del";
+        del.type = "button";
+        del.textContent = "✕";
+        del.addEventListener("click", () => {
+          tasks = tasks.filter(x => x.id !== t.id);
+          saveTasks(dateKey, tasks);
+          render();
+        });
+
+        row.appendChild(check);
+        row.appendChild(text);
+        row.appendChild(del);
+        listEl.appendChild(row);
+      }
+
+      hintEl.textContent = `${tasks.length} задач`;
+    }
+
+    function addTask(){
+      const text = (taskInput.value || "").trim();
+      if(!text) return;
+      tasks.unshift({ id: crypto.randomUUID(), text, done:false });
+      taskInput.value = "";
+      saveTasks(dateKey, tasks);
+      render();
+      try { tg?.HapticFeedback?.impactOccurred("light"); } catch {}
+    }
+
+    addBtn.addEventListener("click", addTask);
+    taskInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") addTask();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      tasks = [];
+      saveTasks(dateKey, tasks);
+      render();
+    });
+
+    // ВНИМАНИЕ: sendData закрывает мини-апп после отправки
+    sendBtn.addEventListener("click", () => {
+      if(!tg) return;
+      const payload = {
+        action: "save_day",
+        date: dateKey,
+        tasks: tasks.map(t => ({ text: t.text, done: !!t.done }))
+      };
+      tg.sendData(JSON.stringify(payload));
+    });
+
+    render();
+  </script>
+</body>
+</html>
