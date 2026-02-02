@@ -135,36 +135,104 @@
       align-items:center;
     }
 
-    .iconBtn{
-      width:42px;
-      height:42px;
-      border-radius: 14px;
+	.iconBtn{
+	  width:42px;
+	  height:42px;
+	  border-radius: 14px;
+	  display:grid;
+	  place-items:center;
+	  cursor:pointer;
+	  user-select:none;
+	  padding:0;
+	  background: transparent;
+	  border:0;
+	}
+	.iconBtn svg{ width:18px; height:18px; opacity:.82; }
+	
+	
+	/* NAV buttons styled exactly like day cells */
+	.navCell{
+	  border-radius: 14px;             /* как было у кнопок */
+	  position:relative;
+	  overflow:hidden;
 
-      border: 1px solid rgba(255,255,255,.28);
-      background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.55),
-        0 10px 26px rgba(15,23,42,.12);
+	  background:
+		radial-gradient(160px 120px at 28% 18%, rgba(255,255,255,.55), transparent 62%),
+		radial-gradient(180px 140px at 78% 86%, rgba(var(--lime), .10), transparent 62%),
+		linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
 
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      user-select:none;
+	  border: 1px solid rgba(255,255,255,.22);
 
-      backdrop-filter: blur(22px) saturate(190%) contrast(112%);
-      -webkit-backdrop-filter: blur(22px) saturate(190%) contrast(112%);
+	  box-shadow:
+		inset 0 1px 0 rgba(255,255,255,.55),
+		inset 0 -1px 0 rgba(15,23,42,.08),
+		0 10px 26px rgba(15,23,42,.10);
 
-      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
-    }
-    .iconBtn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,.42);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.60),
-        0 14px 34px rgba(15,23,42,.14);
-    }
-    .iconBtn:active{ transform: translateY(0) scale(.98); }
-    .iconBtn svg{ width:18px; height:18px; opacity:.82; }
+	  backdrop-filter: blur(34px) saturate(220%) contrast(120%);
+	  -webkit-backdrop-filter: blur(34px) saturate(220%) contrast(120%);
+
+	  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+	  z-index:1;
+
+	  --shade: .09; /* базовая матовость как у дня */
+	}
+
+	/* градиентный "обводочный" штрих как у .cell */
+	.navCell::before{
+	  content:"";
+	  position:absolute;
+	  inset:0;
+	  padding:1px;
+	  border-radius: 14px;
+	  background: linear-gradient(135deg, rgba(255,255,255,.70), rgba(255,255,255,0));
+	  -webkit-mask:
+		linear-gradient(#000 0 0) content-box,
+		linear-gradient(#000 0 0);
+	  -webkit-mask-composite: xor;
+	  mask-composite: exclude;
+	  opacity:.85;
+	  pointer-events:none;
+	}
+
+	/* шум + затемнение как у дня */
+	.navCell::after{
+	  content:"";
+	  position:absolute;
+	  inset:0;
+	  background:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E") 0 0/160px 160px,
+		linear-gradient(0deg, rgba(15,23,42,1), rgba(15,23,42,1));
+	  mix-blend-mode: overlay;
+	  opacity: var(--shade);
+	  pointer-events:none;
+	  transition: opacity .16s ease;
+	}
+
+	/* hover/active как у дня */
+	.navCell:hover{
+	  z-index: 10;
+	  transform: translateY(-4px) scale(1.02);
+	  border-color: rgba(255,255,255,.52);
+	  box-shadow:
+		inset 0 1px 0 rgba(255,255,255,.65),
+		inset 0 -1px 0 rgba(15,23,42,.12),
+		0 30px 80px rgba(15,23,42,.22),
+		0 10px 24px rgba(15,23,42,.14);
+	  --shade: .14;
+	}
+
+	.navCell:active{
+	  z-index: 10;
+	  transform: translateY(-3px) scale(1.02);
+	  border-color: rgba(255,255,255,.52);
+	  box-shadow:
+		inset 0 1px 0 rgba(255,255,255,.65),
+		inset 0 -1px 0 rgba(15,23,42,.12),
+		0 28px 74px rgba(15,23,42,.20),
+		0 10px 24px rgba(15,23,42,.14);
+	  --shade: .16;
+	}
+
 
     .dow{
       display:grid;
@@ -281,6 +349,10 @@
       z-index:1;
       user-select:none;
     }
+	
+	.dayBtn:active{
+	  transform: scale(.985);
+	}
 
     /* Hover: lift + slightly darker glass */
 	.cell:not(.empty):hover{
@@ -294,6 +366,25 @@
 		0 10px 24px rgba(15,23,42,.14);
 	}
 	.cell:not(.empty):hover{ --shade: .14; }
+	
+	/* Mobile tap animation (JS will toggle .tap) */
+	.cell.tap{
+	  z-index: 10;
+	  transform: translateY(-4px) scale(1.02);
+	  border-color: rgba(255,255,255,.52);
+	  box-shadow:
+		inset 0 1px 0 rgba(255,255,255,.65),
+		inset 0 -1px 0 rgba(15,23,42,.12),
+		0 30px 80px rgba(15,23,42,.22),
+		0 10px 24px rgba(15,23,42,.14);
+	  --shade: .14;
+	}
+
+	/* Optional: slightly stronger press feedback */
+	.cell.tap:active{
+	  transform: translateY(-3px) scale(1.02);
+	  --shade: .16;
+	}
 	
 	
 	.cell:not(.empty):active,
@@ -366,12 +457,12 @@
         <div class="top">
           <div class="monthTitle" id="monthTitle">—</div>
           <div class="nav">
-            <button class="iconBtn" id="prevBtn" aria-label="Назад">
+            <button class="iconBtn navCell" id="prevBtn" aria-label="Назад">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M15 18l-6-6 6-6"/>
               </svg>
             </button>
-            <button class="iconBtn" id="nextBtn" aria-label="Вперёд">
+            <button class="iconBtn navCell" id="nextBtn" aria-label="Вперёд">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 6l6 6-6 6"/>
               </svg>
@@ -441,6 +532,15 @@
     function daysInMonth(year, month){
       return new Date(year, month + 1, 0).getDate();
     }
+	
+	function pulseCell(cell){
+	  if(!cell) return;
+	  cell.classList.remove("tap");      // сброс, чтобы повторно сработало
+	  // форсим reflow
+	  void cell.offsetWidth;
+	  cell.classList.add("tap");
+	  setTimeout(() => cell.classList.remove("tap"), 160);
+	}	
 
     function render(){
       titleEl.textContent = `${monthNames[view.month]} ${view.year}`;
@@ -471,6 +571,9 @@
         btn.setAttribute("data-key", k);
 
 		btn.addEventListener("click", () => {
+		  // красивый "тап" эффект на телефоне/ПК
+		  pulseCell(cell);
+
 		  const isSecondTap = (view.selectedKey === k);
 
 		  // 1-й тап: просто выбираем день
@@ -481,9 +584,10 @@
 			return;
 		  }
 
-		  // 2-й тап по тому же дню: переходим в день
+		  // 2-й тап: переходим
 		  window.location.href = `day.html?date=${encodeURIComponent(k)}`;
 		});
+
 
 
         cell.appendChild(btn);
