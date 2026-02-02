@@ -73,17 +73,19 @@
     }
 
     /* subtle grain */
-    .glass::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      opacity:.10;
-      background-image:
-        repeating-linear-gradient(0deg, rgba(0,0,0,.06) 0 1px, transparent 1px 2px),
-        repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px);
-      mix-blend-mode: overlay;
-    }
+	.glass::after{
+	  content:"";
+	  position:absolute;
+	  inset:0;
+	  pointer-events:none;
+
+	  /* лёгкий шум без полос */
+	  background:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E") 0 0/180px 180px;
+	  mix-blend-mode: overlay;
+	  opacity:.08;
+	}
+
 
     .inner{
       position:relative;
@@ -227,23 +229,27 @@
     }
 
     /* overlay for hover/selected darkening */
-	.cell{ --shade: 0; z-index:1; }
+	.cell{
+	  z-index:1;
+	  --shade: .09;         /* базовая "матовость" для всех дней */
+	}
 
 	.cell::after{
 	  content:"";
 	  position:absolute;
 	  inset:0;
 
-	  /* мягкий шум без полос (SVG fractal noise) + затемнение по --shade */
+	  /* шум + тёмная подложка (темнение контролируем opacity через --shade) */
 	  background:
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E") 0 0/160px 160px,
-		rgba(15,23,42,var(--shade));
+		linear-gradient(0deg, rgba(15,23,42,1), rgba(15,23,42,1));
 
 	  mix-blend-mode: overlay;
-	  opacity: .45;
+	  opacity: var(--shade);              /* ВОТ ТУТ теперь реально работает shade */
 	  pointer-events:none;
 	  transition: opacity .16s ease;
 	}
+
 
 
     /* empty cells should not look like dashed boxes */
@@ -287,7 +293,7 @@
 		0 30px 80px rgba(15,23,42,.22),
 		0 10px 24px rgba(15,23,42,.14);
 	}
-	.cell:not(.empty):hover{ --shade: .10; }
+	.cell:not(.empty):hover{ --shade: .14; }
 	
 	
 	.cell:not(.empty):active,
@@ -300,34 +306,36 @@
 		inset 0 -1px 0 rgba(15,23,42,.12),
 		0 28px 74px rgba(15,23,42,.20),
 		0 10px 24px rgba(15,23,42,.14);
-	  --shade: .12;
+	  --shade: .16;
 	}
 	
 
 
     /* Today: subtle lime accent but still glass */
-    .cell.today{
-      border-color: rgba(var(--lime), .22);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.60),
-        inset 0 -1px 0 rgba(15,23,42,.10),
-        0 14px 36px rgba(var(--lime), .12),
-        0 12px 28px rgba(15,23,42,.10);
-	--shade: .06;
-    }
+	.cell.today{
+	  border-color: rgba(var(--lime), .22);
+	  box-shadow:
+		inset 0 1px 0 rgba(255,255,255,.60),
+		inset 0 -1px 0 rgba(15,23,42,.10),
+		0 14px 36px rgba(var(--lime), .12),
+		0 12px 28px rgba(15,23,42,.10);
+
+	  --shade: .13; /* today всегда темнее */
+	}
 
     /* Selected: darker glass overlay */
-    .cell.selected{
-      border-color: rgba(255,255,255,.42);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.62),
-        inset 0 -1px 0 rgba(15,23,42,.12),
-        0 22px 58px rgba(15,23,42,.16);
-	--shade: .18;
-    }
-	
+	.cell.selected{
+	  border-color: rgba(255,255,255,.42);
+	  box-shadow:
+		inset 0 1px 0 rgba(255,255,255,.62),
+		inset 0 -1px 0 rgba(15,23,42,.12),
+		0 22px 58px rgba(15,23,42,.16);
+
+	  --shade: .20;
+	}
+
 	.cell.today.selected{
-	  --shade: .22; 
+	  --shade: .24;
 	}
 
 
@@ -462,13 +470,21 @@
         btn.textContent = day;
         btn.setAttribute("data-key", k);
 
-        btn.addEventListener("click", () => {
-          view.selectedKey = k;
-          saveState();
-          render();
+		btn.addEventListener("click", () => {
+		  const isSecondTap = (view.selectedKey === k);
 
-          window.location.href = `day.html?date=${encodeURIComponent(k)}`;
-        });
+		  // 1-й тап: просто выбираем день
+		  if (!isSecondTap) {
+			view.selectedKey = k;
+			saveState();
+			render();
+			return;
+		  }
+
+		  // 2-й тап по тому же дню: переходим в день
+		  window.location.href = `day.html?date=${encodeURIComponent(k)}`;
+		});
+
 
         cell.appendChild(btn);
         gridEl.appendChild(cell);
