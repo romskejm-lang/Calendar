@@ -7,13 +7,12 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root{
-      /* ---- palette (white + calm lime) ---- */
       --bgA: #fbfcff;
       --bgB: #f3f8ff;
 
-      --lime: 163 230 53;      /* lime-400-ish */
-      --mint: 110 231 183;     /* emerald/mint */
-      --ink: 15 23 42;         /* slate-900 */
+      --lime: 163 230 53;
+      --mint: 110 231 183;
+      --ink: 15 23 42;
 
       --radius: 22px;
       --cellRadius: 16px;
@@ -34,7 +33,6 @@
       justify-content:center;
       padding:18px;
 
-      /* calm white background with lime glass vibe */
       background:
         radial-gradient(900px 520px at 15% 10%, rgba(var(--lime), .16), transparent 58%),
         radial-gradient(820px 520px at 88% 14%, rgba(var(--mint), .14), transparent 58%),
@@ -44,7 +42,6 @@
 
     .wrap{ width:min(720px, 100%); }
 
-    /* ---- main glass panel (more iOS) ---- */
     .glass{
       position:relative;
       border-radius: var(--radius);
@@ -59,7 +56,6 @@
       -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(112%);
     }
 
-    /* top highlight */
     .glass::before{
       content:"";
       position:absolute;
@@ -72,45 +68,38 @@
       pointer-events:none;
     }
 
-    /* subtle grain */
-	.glass::after{
-	  content:"";
-	  position:absolute;
-	  inset:0;
-	  pointer-events:none;
-
-	  /* лёгкий шум без полос */
-	  background:
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E") 0 0/180px 180px;
-	  mix-blend-mode: overlay;
-	  opacity:.08;
-	}
-
+    .glass::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E") 0 0/180px 180px;
+      mix-blend-mode: overlay;
+      opacity:.08;
+    }
 
     .inner{
       position:relative;
       padding:18px;
     }
 
-    /* NEW: "wallpaper" inside the panel so cells actually blur something */
-	.inner::before{
-	  content:"";
-	  position:absolute;
-	  inset:-50px;
-	  background:
-		radial-gradient(560px 360px at 18% 22%, rgba(var(--lime), .30), transparent 62%),
-		radial-gradient(560px 360px at 82% 18%, rgba(var(--mint), .24), transparent 62%),
-		radial-gradient(640px 380px at 62% 86%, rgba(99,102,241,.14), transparent 64%),
-		radial-gradient(760px 440px at 40% 55%, rgba(148,163,184,.16), transparent 66%),
-		linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
-	  filter: blur(12px);
-	  opacity:1;
-	  pointer-events:none;
-	  z-index:0;
-	}
+    .inner::before{
+      content:"";
+      position:absolute;
+      inset:-50px;
+      background:
+        radial-gradient(560px 360px at 18% 22%, rgba(var(--lime), .30), transparent 62%),
+        radial-gradient(560px 360px at 82% 18%, rgba(var(--mint), .24), transparent 62%),
+        radial-gradient(640px 380px at 62% 86%, rgba(99,102,241,.14), transparent 64%),
+        radial-gradient(760px 440px at 40% 55%, rgba(148,163,184,.16), transparent 66%),
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
+      filter: blur(12px);
+      opacity:1;
+      pointer-events:none;
+      z-index:0;
+    }
 
-
-    /* keep content over wallpaper */
     .top, .dow, .grid{ position:relative; z-index:1; }
 
     .top{
@@ -135,104 +124,112 @@
       align-items:center;
     }
 
-	.iconBtn{
-	  width:42px;
-	  height:42px;
-	  border-radius: 14px;
-	  display:grid;
-	  place-items:center;
-	  cursor:pointer;
-	  user-select:none;
-	  padding:0;
-	  background: transparent;
-	  border:0;
-	}
-	.iconBtn svg{ width:18px; height:18px; opacity:.82; }
-	
-	
-	/* NAV buttons styled exactly like day cells */
-	.navCell{
-	  border-radius: 14px;             /* как было у кнопок */
-	  position:relative;
-	  overflow:hidden;
+    .iconBtn{
+      width:42px;
+      height:42px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      padding:0;
+      background: transparent;
+      border:0;
+    }
+    .iconBtn svg{ width:18px; height:18px; opacity:.82; }
 
-	  background:
-		radial-gradient(160px 120px at 28% 18%, rgba(255,255,255,.55), transparent 62%),
-		radial-gradient(180px 140px at 78% 86%, rgba(var(--lime), .10), transparent 62%),
-		linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+    .navCell{
+      border-radius: 14px;
+      position:relative;
+      overflow:hidden;
 
-	  border: 1px solid rgba(255,255,255,.22);
+      background:
+        radial-gradient(160px 120px at 28% 18%, rgba(255,255,255,.55), transparent 62%),
+        radial-gradient(180px 140px at 78% 86%, rgba(var(--lime), .10), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
 
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.55),
-		inset 0 -1px 0 rgba(15,23,42,.08),
-		0 10px 26px rgba(15,23,42,.10);
+      border: 1px solid rgba(255,255,255,.22);
 
-	  backdrop-filter: blur(34px) saturate(220%) contrast(120%);
-	  -webkit-backdrop-filter: blur(34px) saturate(220%) contrast(120%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.55),
+        inset 0 -1px 0 rgba(15,23,42,.08),
+        0 10px 26px rgba(15,23,42,.10);
 
-	  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
-	  z-index:1;
+      backdrop-filter: blur(34px) saturate(220%) contrast(120%);
+      -webkit-backdrop-filter: blur(34px) saturate(220%) contrast(120%);
 
-	  --shade: .09; /* базовая матовость как у дня */
-	}
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      z-index:1;
 
-	/* градиентный "обводочный" штрих как у .cell */
-	.navCell::before{
-	  content:"";
-	  position:absolute;
-	  inset:0;
-	  padding:1px;
-	  border-radius: 14px;
-	  background: linear-gradient(135deg, rgba(255,255,255,.70), rgba(255,255,255,0));
-	  -webkit-mask:
-		linear-gradient(#000 0 0) content-box,
-		linear-gradient(#000 0 0);
-	  -webkit-mask-composite: xor;
-	  mask-composite: exclude;
-	  opacity:.85;
-	  pointer-events:none;
-	}
+      --shade: .09;
+    }
 
-	/* шум + затемнение как у дня */
-	.navCell::after{
-	  content:"";
-	  position:absolute;
-	  inset:0;
-	  background:
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E") 0 0/160px 160px,
-		linear-gradient(0deg, rgba(15,23,42,1), rgba(15,23,42,1));
-	  mix-blend-mode: overlay;
-	  opacity: var(--shade);
-	  pointer-events:none;
-	  transition: opacity .16s ease;
-	}
+    .navCell::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      padding:1px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,255,255,.70), rgba(255,255,255,0));
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity:.85;
+      pointer-events:none;
+    }
 
-	/* hover/active как у дня */
-	.navCell:hover{
-	  z-index: 10;
-	  transform: translateY(-4px) scale(1.02);
-	  border-color: rgba(255,255,255,.52);
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.65),
-		inset 0 -1px 0 rgba(15,23,42,.12),
-		0 30px 80px rgba(15,23,42,.22),
-		0 10px 24px rgba(15,23,42,.14);
-	  --shade: .14;
-	}
+    .navCell::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E") 0 0/160px 160px,
+        linear-gradient(0deg, rgba(15,23,42,1), rgba(15,23,42,1));
+      mix-blend-mode: overlay;
+      opacity: var(--shade);
+      pointer-events:none;
+      transition: opacity .16s ease;
+    }
 
-	.navCell:active{
-	  z-index: 10;
-	  transform: translateY(-3px) scale(1.02);
-	  border-color: rgba(255,255,255,.52);
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.65),
-		inset 0 -1px 0 rgba(15,23,42,.12),
-		0 28px 74px rgba(15,23,42,.20),
-		0 10px 24px rgba(15,23,42,.14);
-	  --shade: .16;
-	}
+    /* ПК hover — НЕ ТРОГАЕМ */
+    .navCell:hover{
+      z-index: 10;
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(255,255,255,.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(15,23,42,.12),
+        0 30px 80px rgba(15,23,42,.22),
+        0 10px 24px rgba(15,23,42,.14);
+      --shade: .14;
+    }
 
+    .navCell:active{
+      z-index: 10;
+      transform: translateY(-3px) scale(1.02);
+      border-color: rgba(255,255,255,.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(15,23,42,.12),
+        0 28px 74px rgba(15,23,42,.20),
+        0 10px 24px rgba(15,23,42,.14);
+      --shade: .16;
+    }
+
+    /* ✅ добавили: тап-анимация для nav на телефоне */
+    .navCell.tap{
+      z-index: 10;
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(255,255,255,.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(15,23,42,.12),
+        0 30px 80px rgba(15,23,42,.22),
+        0 10px 24px rgba(15,23,42,.14);
+      --shade: .14;
+    }
 
     .dow{
       display:grid;
@@ -254,7 +251,6 @@
       gap:10px;
     }
 
-    /* ---- day cells: iOS-like glass ---- */
     .cell{
       aspect-ratio: 1 / 1;
       border-radius: var(--cellRadius);
@@ -277,9 +273,10 @@
       -webkit-backdrop-filter: blur(34px) saturate(220%) contrast(120%);
 
       transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      z-index:1;
+      --shade: .09;
     }
 
-    /* iOS gradient stroke (not a dark border) */
     .cell::before{
       content:"";
       position:absolute;
@@ -296,31 +293,19 @@
       pointer-events:none;
     }
 
-    /* overlay for hover/selected darkening */
-	.cell{
-	  z-index:1;
-	  --shade: .09;         /* базовая "матовость" для всех дней */
-	}
+    .cell::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E") 0 0/160px 160px,
+        linear-gradient(0deg, rgba(15,23,42,1), rgba(15,23,42,1));
+      mix-blend-mode: overlay;
+      opacity: var(--shade);
+      pointer-events:none;
+      transition: opacity .16s ease;
+    }
 
-	.cell::after{
-	  content:"";
-	  position:absolute;
-	  inset:0;
-
-	  /* шум + тёмная подложка (темнение контролируем opacity через --shade) */
-	  background:
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E") 0 0/160px 160px,
-		linear-gradient(0deg, rgba(15,23,42,1), rgba(15,23,42,1));
-
-	  mix-blend-mode: overlay;
-	  opacity: var(--shade);              /* ВОТ ТУТ теперь реально работает shade */
-	  pointer-events:none;
-	  transition: opacity .16s ease;
-	}
-
-
-
-    /* empty cells should not look like dashed boxes */
     .cell.empty{
       opacity:0;
       border:0;
@@ -348,87 +333,74 @@
       position:relative;
       z-index:1;
       user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
-	
-	.dayBtn:active{
-	  transform: scale(.985);
-	}
 
-    /* Hover: lift + slightly darker glass */
-	.cell:not(.empty):hover{
-	  z-index: 10;
-	  transform: translateY(-4px) scale(1.02);
-	  border-color: rgba(255,255,255,.52);
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.65),
-		inset 0 -1px 0 rgba(15,23,42,.12),
-		0 30px 80px rgba(15,23,42,.22),
-		0 10px 24px rgba(15,23,42,.14);
-	}
-	.cell:not(.empty):hover{ --shade: .14; }
-	
-	/* Mobile tap animation (JS will toggle .tap) */
-	.cell.tap{
-	  z-index: 10;
-	  transform: translateY(-4px) scale(1.02);
-	  border-color: rgba(255,255,255,.52);
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.65),
-		inset 0 -1px 0 rgba(15,23,42,.12),
-		0 30px 80px rgba(15,23,42,.22),
-		0 10px 24px rgba(15,23,42,.14);
-	  --shade: .14;
-	}
+    .dayBtn:active{
+      transform: scale(.985);
+    }
 
-	/* Optional: slightly stronger press feedback */
-	.cell.tap:active{
-	  transform: translateY(-3px) scale(1.02);
-	  --shade: .16;
-	}
-	
-	
-	.cell:not(.empty):active,
-	.cell:not(.empty):focus-within{
-	  z-index: 10;
-	  transform: translateY(-3px) scale(1.02);
-	  border-color: rgba(255,255,255,.52);
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.65),
-		inset 0 -1px 0 rgba(15,23,42,.12),
-		0 28px 74px rgba(15,23,42,.20),
-		0 10px 24px rgba(15,23,42,.14);
-	  --shade: .16;
-	}
-	
+    /* ПК hover — НЕ ТРОГАЕМ */
+    .cell:not(.empty):hover{
+      z-index: 10;
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(255,255,255,.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(15,23,42,.12),
+        0 30px 80px rgba(15,23,42,.22),
+        0 10px 24px rgba(15,23,42,.14);
+    }
+    .cell:not(.empty):hover{ --shade: .14; }
 
+    /* ✅ телефонная "hover-имитация" */
+    .cell.tap{
+      z-index: 10;
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(255,255,255,.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(15,23,42,.12),
+        0 30px 80px rgba(15,23,42,.22),
+        0 10px 24px rgba(15,23,42,.14);
+      --shade: .14;
+    }
 
-    /* Today: subtle lime accent but still glass */
-	.cell.today{
-	  border-color: rgba(var(--lime), .22);
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.60),
-		inset 0 -1px 0 rgba(15,23,42,.10),
-		0 14px 36px rgba(var(--lime), .12),
-		0 12px 28px rgba(15,23,42,.10);
+    .cell:not(.empty):active,
+    .cell:not(.empty):focus-within{
+      z-index: 10;
+      transform: translateY(-3px) scale(1.02);
+      border-color: rgba(255,255,255,.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(15,23,42,.12),
+        0 28px 74px rgba(15,23,42,.20),
+        0 10px 24px rgba(15,23,42,.14);
+      --shade: .16;
+    }
 
-	  --shade: .13; /* today всегда темнее */
-	}
+    .cell.today{
+      border-color: rgba(var(--lime), .22);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.60),
+        inset 0 -1px 0 rgba(15,23,42,.10),
+        0 14px 36px rgba(var(--lime), .12),
+        0 12px 28px rgba(15,23,42,.10);
+      --shade: .13;
+    }
 
-    /* Selected: darker glass overlay */
-	.cell.selected{
-	  border-color: rgba(255,255,255,.42);
-	  box-shadow:
-		inset 0 1px 0 rgba(255,255,255,.62),
-		inset 0 -1px 0 rgba(15,23,42,.12),
-		0 22px 58px rgba(15,23,42,.16);
+    .cell.selected{
+      border-color: rgba(255,255,255,.42);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.62),
+        inset 0 -1px 0 rgba(15,23,42,.12),
+        0 22px 58px rgba(15,23,42,.16);
+      --shade: .20;
+    }
 
-	  --shade: .20;
-	}
-
-	.cell.today.selected{
-	  --shade: .24;
-	}
-
+    .cell.today.selected{
+      --shade: .24;
+    }
 
     @media (max-width: 480px){
       .inner{ padding:14px; }
@@ -438,7 +410,6 @@
       .dayBtn{ font-size:13px; }
     }
 
-    /* Fallback when backdrop-filter unsupported */
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
       .glass, .iconBtn, .cell{
         background: rgba(255,255,255,.88);
@@ -503,6 +474,39 @@
       selectedKey: todayKey
     };
 
+    function isTouchPointer(e){
+      // pointerType есть в современных WebView Telegram на Android
+      return e && (e.pointerType === "touch");
+    }
+
+    function hapticLight(){
+      try{
+        if (tg?.HapticFeedback?.impactOccurred) {
+          tg.HapticFeedback.impactOccurred("light");
+          return;
+        }
+      }catch{}
+      try{ navigator.vibrate?.(10); }catch{}
+    }
+
+    function hapticMedium(){
+      try{
+        if (tg?.HapticFeedback?.impactOccurred) {
+          tg.HapticFeedback.impactOccurred("medium");
+          return;
+        }
+      }catch{}
+      try{ navigator.vibrate?.(18); }catch{}
+    }
+
+    function pulse(el){
+      if(!el) return;
+      el.classList.remove("tap");
+      void el.offsetWidth;
+      el.classList.add("tap");
+      setTimeout(() => el.classList.remove("tap"), 170);
+    }
+
     function keyOf(d){
       const y = d.getFullYear();
       const m = String(d.getMonth()+1).padStart(2,"0");
@@ -526,21 +530,12 @@
     }
 
     function mondayIndex(jsDay){
-      return (jsDay + 6) % 7; // JS: 0=Sun..6=Sat -> 0=Mon..6=Sun
+      return (jsDay + 6) % 7;
     }
 
     function daysInMonth(year, month){
       return new Date(year, month + 1, 0).getDate();
     }
-	
-	function pulseCell(cell){
-	  if(!cell) return;
-	  cell.classList.remove("tap");      // сброс, чтобы повторно сработало
-	  // форсим reflow
-	  void cell.offsetWidth;
-	  cell.classList.add("tap");
-	  setTimeout(() => cell.classList.remove("tap"), 160);
-	}	
 
     function render(){
       titleEl.textContent = `${monthNames[view.month]} ${view.year}`;
@@ -570,25 +565,52 @@
         btn.textContent = day;
         btn.setAttribute("data-key", k);
 
-		btn.addEventListener("click", () => {
-		  // красивый "тап" эффект на телефоне/ПК
-		  pulseCell(cell);
+        // ✅ На телефоне запускаем lift сразу при касании (до click)
+        btn.addEventListener("pointerdown", (e) => {
+          if (!isTouchPointer(e)) return;
+          btn.dataset.tp = "1";
+          pulse(cell);
+          hapticLight();
+        }, { passive: true });
 
-		  const isSecondTap = (view.selectedKey === k);
+        btn.addEventListener("click", () => {
+          const touched = (btn.dataset.tp === "1");
+          if (touched) delete btn.dataset.tp;
 
-		  // 1-й тап: просто выбираем день
-		  if (!isSecondTap) {
-			view.selectedKey = k;
-			saveState();
-			render();
-			return;
-		  }
+          // ПК: оставляем как было (pulse по клику)
+          if (!touched) pulse(cell);
 
-		  // 2-й тап: переходим
-		  window.location.href = `day.html?date=${encodeURIComponent(k)}`;
-		});
+          const isSecondTap = (view.selectedKey === k);
 
+          // 1-й тап: выбираем день
+          if (!isSecondTap) {
+            view.selectedKey = k;
+            saveState();
 
+            if (touched) {
+              // ✅ ВАЖНО: НЕ render() сразу — иначе убиваем анимацию.
+              const prevSel = gridEl.querySelector(".cell.selected");
+              if (prevSel && prevSel !== cell) prevSel.classList.remove("selected");
+              cell.classList.add("selected");
+              return;
+            }
+
+            // ПК / мышь
+            render();
+            return;
+          }
+
+          // 2-й тап: переход
+          if (touched) {
+            hapticMedium();
+            setTimeout(() => {
+              window.location.href = `day.html?date=${encodeURIComponent(k)}`;
+            }, 90);
+            return;
+          }
+
+          window.location.href = `day.html?date=${encodeURIComponent(k)}`;
+        });
 
         cell.appendChild(btn);
         gridEl.appendChild(cell);
@@ -608,18 +630,50 @@
       return c;
     }
 
+    // ✅ Тап-анимация + хаптик на навигации месяцев (телефон)
+    prevBtn.addEventListener("pointerdown", (e) => {
+      if (!isTouchPointer(e)) return;
+      prevBtn.dataset.tp = "1";
+      pulse(prevBtn);
+      hapticLight();
+    }, { passive: true });
+
+    nextBtn.addEventListener("pointerdown", (e) => {
+      if (!isTouchPointer(e)) return;
+      nextBtn.dataset.tp = "1";
+      pulse(nextBtn);
+      hapticLight();
+    }, { passive: true });
+
     prevBtn.addEventListener("click", () => {
+      const touched = (prevBtn.dataset.tp === "1");
+      if (touched) delete prevBtn.dataset.tp;
+
       view.month--;
       if(view.month < 0){ view.month = 11; view.year--; }
       saveState();
-      render();
+
+      if (touched) {
+        // ✅ даём тап-анимации дожить
+        setTimeout(render, 170);
+      } else {
+        render();
+      }
     });
 
     nextBtn.addEventListener("click", () => {
+      const touched = (nextBtn.dataset.tp === "1");
+      if (touched) delete nextBtn.dataset.tp;
+
       view.month++;
       if(view.month > 11){ view.month = 0; view.year++; }
       saveState();
-      render();
+
+      if (touched) {
+        setTimeout(render, 170);
+      } else {
+        render();
+      }
     });
 
     render();
