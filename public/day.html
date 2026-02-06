@@ -21,6 +21,9 @@
 
       --text: rgb(var(--ink));
       --muted: rgba(15,23,42,.55);
+
+      /* FIX: реальная высота в TG / mobile */
+      --appH: 100vh;
     }
 
     *{ box-sizing:border-box; }
@@ -34,6 +37,9 @@
       align-items:center;
       justify-content:center;
       padding:18px;
+
+      /* FIX: не даём странице скроллиться — скролл будет внутри glass */
+      overflow:hidden;
 
       background:
         radial-gradient(900px 520px at 15% 10%, rgba(var(--lime), .16), transparent 58%),
@@ -57,6 +63,9 @@
 
       backdrop-filter: blur(30px) saturate(190%) contrast(112%);
       -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(112%);
+
+      /* FIX: ограничиваем высоту "стекла" по viewport */
+      max-height: calc(var(--appH) - 36px); /* body padding 18*2 */
     }
 
     .glass::before{
@@ -85,7 +94,22 @@
     .inner{
       position:relative;
       padding:18px;
+
+      /* FIX: скролл ВНУТРИ inner, чтобы не клипать тени у карточек */
+      max-height: calc(var(--appH) - 36px);
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+
+      /* чтобы норм работала sticky-шапка и layout */
+      display:flex;
+      flex-direction:column;
+
+      /* косметика: убираем полоску скролла */
+      scrollbar-width: none;
     }
+    .inner::-webkit-scrollbar{ width:0; height:0; }
 
     .inner::before{
       content:"";
@@ -102,7 +126,14 @@
       z-index:0;
     }
 
-    .top, .bar, .list{ position:relative; z-index:1; }
+    .top, .bar, .list, .stickyHeader{ position:relative; z-index:1; }
+
+    /* FIX: шапка всегда доступна (sticky внутри scroll-container .inner) */
+    .stickyHeader{
+      position: sticky;
+      top: 0;
+      z-index: 1000; /* выше карточек даже при hover/open */
+    }
 
     /* === TOP BAR === */
     .top{
@@ -274,6 +305,9 @@
 
       -webkit-tap-highlight-color: transparent;
       will-change: transform;
+
+      /* FIX: чтобы scrollIntoView не прятало карточку под шапкой */
+      scroll-margin-top: 130px;
     }
 
     .task::before{
@@ -381,10 +415,10 @@
       border: 1px solid rgba(15,23,42,.10);
       flex:0 0 auto;
     }
-    .dot.green{  background:#22c55e; }  /* низкий */
-    .dot.yellow{ background:#facc15; }  /* средний */
-    .dot.red{    background:#ef4444; }  /* высокий */
-    .dot.black{  background:#0f172a; }  /* очень высокий */
+    .dot.green{  background:#22c55e; }
+    .dot.yellow{ background:#facc15; }
+    .dot.red{    background:#ef4444; }
+    .dot.black{  background:#0f172a; }
 
     .title{
       font-size:18px;
@@ -632,44 +666,48 @@
 <body>
   <div class="wrap">
     <div class="glass">
-      <div class="inner">
-        <div class="top">
-          <button class="iconBtn navCell" id="backBtn" aria-label="Назад">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
+      <div class="inner" id="innerScroll">
 
-          <div class="dateTitle" id="dateTitle">—</div>
-
-          <div class="nav">
-            <button class="iconBtn navCell" id="plusBtn" aria-label="Добавить">
+        <!-- FIX: обёртка для sticky шапки -->
+        <div class="stickyHeader">
+          <div class="top">
+            <button class="iconBtn navCell" id="backBtn" aria-label="Назад">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14"/>
-                <path d="M5 12h14"/>
+                <path d="M15 18l-6-6 6-6"/>
               </svg>
             </button>
 
-            <button class="iconBtn navCell" id="sendBtn" aria-label="Отправить боту">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 2L11 13"/>
-                <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+            <div class="dateTitle" id="dateTitle">—</div>
+
+            <div class="nav">
+              <button class="iconBtn navCell" id="plusBtn" aria-label="Добавить">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14"/>
+                  <path d="M5 12h14"/>
+                </svg>
+              </button>
+
+              <button class="iconBtn navCell" id="sendBtn" aria-label="Отправить боту">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 2L11 13"/>
+                  <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="bar">
+            <div class="hint" id="hint">0 задач</div>
+            <button class="iconBtn navCell" id="clearBtn" aria-label="Очистить">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/>
+                <path d="M8 6V4h8v2"/>
+                <path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6"/>
+                <path d="M14 11v6"/>
               </svg>
             </button>
           </div>
-        </div>
-
-        <div class="bar">
-          <div class="hint" id="hint">0 задач</div>
-          <button class="iconBtn navCell" id="clearBtn" aria-label="Очистить">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"/>
-              <path d="M8 6V4h8v2"/>
-              <path d="M19 6l-1 14H6L5 6"/>
-              <path d="M10 11v6"/>
-              <path d="M14 11v6"/>
-            </svg>
-          </button>
         </div>
 
         <div class="list" id="list"></div>
@@ -705,12 +743,28 @@
       try{
         if(window.CSS && CSS.escape) return CSS.escape(val);
       }catch{}
-      // очень простой fallback
       return String(val).replace(/["\\]/g, "\\$&");
     }
 
     const tg = window.Telegram?.WebApp;
     try{ tg?.ready(); tg?.expand(); } catch {}
+
+    /* FIX: корректная высота для TG + клавиатура */
+    function setAppHeight(){
+      try{
+        const vv = window.visualViewport;
+        const vvH = vv ? vv.height : null;
+        const tgH = tg ? (tg.viewportStableHeight || tg.viewportHeight) : null;
+        const h = Math.round(tgH || vvH || window.innerHeight || document.documentElement.clientHeight);
+        document.documentElement.style.setProperty("--appH", h + "px");
+      }catch{
+        document.documentElement.style.setProperty("--appH", (window.innerHeight || 0) + "px");
+      }
+    }
+    setAppHeight();
+    try{ tg?.onEvent?.("viewportChanged", setAppHeight); }catch{}
+    window.addEventListener("resize", setAppHeight);
+    try{ window.visualViewport?.addEventListener("resize", setAppHeight); }catch{}
 
     const STORE_KEY = "glass_tasks_v1";
 
@@ -792,7 +846,6 @@
         const bKey = (bS ?? bE ?? Infinity);
         if(aKey !== bKey) return aKey - bKey;
 
-        // стабильность
         const aC = a.createdAt ?? 0;
         const bC = b.createdAt ?? 0;
         if(aC !== bC) return aC - bC;
@@ -835,7 +888,6 @@
       if(navigator.vibrate) navigator.vibrate(kind === "medium" ? 18 : 10);
     }
 
-    // dateKey safe
     const qs = new URLSearchParams(location.search);
     const stateObj = safeParseJSON(localStorage.getItem("glass_calendar_state"), {}) || {};
     const candidate = qs.get("date") || stateObj?.selectedKey || todayKey();
@@ -844,6 +896,7 @@
     const dateTitle = document.getElementById("dateTitle");
     const hintEl = document.getElementById("hint");
     const listEl = document.getElementById("list");
+    const innerScroll = document.getElementById("innerScroll");
 
     const backBtn = document.getElementById("backBtn");
     const plusBtn = document.getElementById("plusBtn");
@@ -881,11 +934,20 @@
     }
 
     function reorderDomByTasks(){
-      // Переставляем элементы в DOM согласно tasks[]
       for(const t of tasks){
         const el = listEl.querySelector(`.task[data-id="${escSel(t.id)}"]`);
         if(el) listEl.appendChild(el);
       }
+    }
+
+    /* FIX: нормальный скролл к карточке внутри .inner с учётом шапки */
+    function scrollToCard(el){
+      if(!el || !innerScroll) return;
+      const r = el.getBoundingClientRect();
+      const ir = innerScroll.getBoundingClientRect();
+      const topInScroll = (r.top - ir.top) + innerScroll.scrollTop;
+      const target = Math.max(0, topInScroll - 140); /* чуть ниже шапки */
+      innerScroll.scrollTo({ top: target, behavior: "smooth" });
     }
 
     function openCardById(id, focusTitle){
@@ -894,7 +956,7 @@
       closeCurrent();
       openId = id;
       el.classList.add("open");
-      el.scrollIntoView({block:"nearest", behavior:"smooth"});
+      scrollToCard(el);
       if(focusTitle){
         const input = el.querySelector('input[data-field="title"]');
         input?.focus?.();
@@ -942,7 +1004,6 @@
       head.appendChild(check);
       head.appendChild(meta);
 
-      // DETAILS
       const details = document.createElement("div");
       details.className = "details";
 
@@ -995,7 +1056,6 @@
         </div>
       `;
 
-      // PRIORITY under description
       const prioWrap = document.createElement("div");
       prioWrap.className = "prioWrap";
 
@@ -1036,7 +1096,6 @@
       prioWrap.appendChild(prioHeader);
       prioWrap.appendChild(prioBtns);
 
-      // ACTIONS
       const actions = document.createElement("div");
       actions.className = "actions";
 
@@ -1055,8 +1114,6 @@
 
       card.appendChild(head);
       card.appendChild(details);
-
-      // --- handlers (без полного render) ---
 
       check.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -1077,6 +1134,7 @@
         openId = t.id;
         card.classList.add("open");
         haptic("select");
+        scrollToCard(card);
       });
 
       closeBtn.addEventListener("click", (e) => {
@@ -1099,7 +1157,6 @@
         haptic("medium");
       });
 
-      // priority click
       prioBtns.addEventListener("click", (e) => {
         const btn = e.target.closest("button[data-prio]");
         if(!btn) return;
@@ -1109,7 +1166,6 @@
         t.priority = newP;
         saveTasks(dateKey, tasks);
 
-        // update UI
         pillDot.className = "dot " + newP;
         prioDot.className = "dot " + newP;
         prioText.textContent = `Приоритет: ${prioLabel(newP)}`;
@@ -1120,7 +1176,6 @@
         haptic("light");
       });
 
-      // fields autosave + time sorting
       const onField = (e) => {
         const el = e.target;
         const field = el?.dataset?.field;
@@ -1133,13 +1188,11 @@
 
         saveTasks(dateKey, tasks);
 
-        // local UI updates
         pillText.textContent = timeLabel(t);
         const cleanTitle = (t.title || "").trim() || "Без названия";
         title.textContent = cleanTitle;
         bigTitle.textContent = cleanTitle;
 
-        // if time changed -> sort + reorder DOM
         if(field === "start" || field === "end"){
           sortTasksInPlace(tasks);
           saveTasks(dateKey, tasks);
@@ -1170,14 +1223,12 @@
       }
     }
 
-    // buttons
     backBtn.addEventListener("click", () => {
       window.location.href = "calendar.html";
     });
 
     plusBtn.addEventListener("click", () => {
       haptic("light");
-
       ensureNoEmptyState();
 
       const nt = normalizeTask({
@@ -1234,7 +1285,6 @@
       tg.sendData(JSON.stringify(payload));
     });
 
-    // init
     render();
   })();
   </script>
