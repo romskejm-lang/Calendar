@@ -35,6 +35,8 @@
       justify-content:center;
       padding:18px;
 
+      overflow:hidden; /* FIX: скролл только внутри стекла */
+
       background:
         radial-gradient(900px 520px at 15% 10%, rgba(var(--lime), .16), transparent 58%),
         radial-gradient(820px 520px at 88% 14%, rgba(var(--mint), .14), transparent 58%),
@@ -57,6 +59,11 @@
 
       backdrop-filter: blur(30px) saturate(190%) contrast(112%);
       -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(112%);
+
+      max-height: calc(100vh - 36px); /* FIX */
+    }
+    @supports (height: 100dvh){
+      .glass{ max-height: calc(100dvh - 36px); } /* FIX: новая единица, если поддерживается */
     }
 
     .glass::before{
@@ -85,6 +92,21 @@
     .inner{
       position:relative;
       padding:18px;
+
+      max-height: calc(100vh - 36px); /* FIX */
+      overflow-y:auto;                /* FIX */
+      overflow-x:hidden;              /* FIX */
+      -webkit-overflow-scrolling: touch; /* FIX */
+      overscroll-behavior: contain;      /* FIX */
+
+      display:flex;                  /* FIX */
+      flex-direction:column;         /* FIX */
+
+      scrollbar-width:none;          /* FIX */
+    }
+    .inner::-webkit-scrollbar{ width:0; height:0; } /* FIX */
+    @supports (height: 100dvh){
+      .inner{ max-height: calc(100dvh - 36px); } /* FIX */
     }
 
     .inner::before{
@@ -103,6 +125,21 @@
     }
 
     .top, .bar, .list{ position:relative; z-index:1; }
+
+    /* FIX: шапка не улетает */
+    .stickyHeader{
+      position: sticky;
+      top: 0;
+      z-index: 200;
+
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(18px) saturate(170%);
+      -webkit-backdrop-filter: blur(18px) saturate(170%);
+      border-bottom: 1px solid rgba(255,255,255,.22);
+
+      padding-bottom: 6px;
+      margin-bottom: 6px;
+    }
 
     /* === TOP BAR === */
     .top{
@@ -274,6 +311,8 @@
 
       -webkit-tap-highlight-color: transparent;
       will-change: transform;
+
+      scroll-margin-top: 130px; /* FIX: чтобы карточку не прятало под sticky */
     }
 
     .task::before{
@@ -633,43 +672,46 @@
   <div class="wrap">
     <div class="glass">
       <div class="inner">
-        <div class="top">
-          <button class="iconBtn navCell" id="backBtn" aria-label="Назад">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
-
-          <div class="dateTitle" id="dateTitle">—</div>
-
-          <div class="nav">
-            <button class="iconBtn navCell" id="plusBtn" aria-label="Добавить">
+        <!-- FIX: шапка sticky -->
+        <div class="stickyHeader">
+          <div class="top">
+            <button class="iconBtn navCell" id="backBtn" aria-label="Назад">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14"/>
-                <path d="M5 12h14"/>
+                <path d="M15 18l-6-6 6-6"/>
               </svg>
             </button>
 
-            <button class="iconBtn navCell" id="sendBtn" aria-label="Отправить боту">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 2L11 13"/>
-                <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+            <div class="dateTitle" id="dateTitle">—</div>
+
+            <div class="nav">
+              <button class="iconBtn navCell" id="plusBtn" aria-label="Добавить">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14"/>
+                  <path d="M5 12h14"/>
+                </svg>
+              </button>
+
+              <button class="iconBtn navCell" id="sendBtn" aria-label="Отправить боту">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 2L11 13"/>
+                  <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="bar">
+            <div class="hint" id="hint">0 задач</div>
+            <button class="iconBtn navCell" id="clearBtn" aria-label="Очистить">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/>
+                <path d="M8 6V4h8v2"/>
+                <path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6"/>
+                <path d="M14 11v6"/>
               </svg>
             </button>
           </div>
-        </div>
-
-        <div class="bar">
-          <div class="hint" id="hint">0 задач</div>
-          <button class="iconBtn navCell" id="clearBtn" aria-label="Очистить">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"/>
-              <path d="M8 6V4h8v2"/>
-              <path d="M19 6l-1 14H6L5 6"/>
-              <path d="M10 11v6"/>
-              <path d="M14 11v6"/>
-            </svg>
-          </button>
         </div>
 
         <div class="list" id="list"></div>
@@ -705,7 +747,6 @@
       try{
         if(window.CSS && CSS.escape) return CSS.escape(val);
       }catch{}
-      // очень простой fallback
       return String(val).replace(/["\\]/g, "\\$&");
     }
 
@@ -792,7 +833,6 @@
         const bKey = (bS ?? bE ?? Infinity);
         if(aKey !== bKey) return aKey - bKey;
 
-        // стабильность
         const aC = a.createdAt ?? 0;
         const bC = b.createdAt ?? 0;
         if(aC !== bC) return aC - bC;
@@ -835,7 +875,6 @@
       if(navigator.vibrate) navigator.vibrate(kind === "medium" ? 18 : 10);
     }
 
-    // dateKey safe
     const qs = new URLSearchParams(location.search);
     const stateObj = safeParseJSON(localStorage.getItem("glass_calendar_state"), {}) || {};
     const candidate = qs.get("date") || stateObj?.selectedKey || todayKey();
@@ -881,7 +920,6 @@
     }
 
     function reorderDomByTasks(){
-      // Переставляем элементы в DOM согласно tasks[]
       for(const t of tasks){
         const el = listEl.querySelector(`.task[data-id="${escSel(t.id)}"]`);
         if(el) listEl.appendChild(el);
@@ -942,7 +980,6 @@
       head.appendChild(check);
       head.appendChild(meta);
 
-      // DETAILS
       const details = document.createElement("div");
       details.className = "details";
 
@@ -995,7 +1032,6 @@
         </div>
       `;
 
-      // PRIORITY under description
       const prioWrap = document.createElement("div");
       prioWrap.className = "prioWrap";
 
@@ -1036,7 +1072,6 @@
       prioWrap.appendChild(prioHeader);
       prioWrap.appendChild(prioBtns);
 
-      // ACTIONS
       const actions = document.createElement("div");
       actions.className = "actions";
 
@@ -1055,8 +1090,6 @@
 
       card.appendChild(head);
       card.appendChild(details);
-
-      // --- handlers (без полного render) ---
 
       check.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -1099,7 +1132,6 @@
         haptic("medium");
       });
 
-      // priority click
       prioBtns.addEventListener("click", (e) => {
         const btn = e.target.closest("button[data-prio]");
         if(!btn) return;
@@ -1109,7 +1141,6 @@
         t.priority = newP;
         saveTasks(dateKey, tasks);
 
-        // update UI
         pillDot.className = "dot " + newP;
         prioDot.className = "dot " + newP;
         prioText.textContent = `Приоритет: ${prioLabel(newP)}`;
@@ -1120,7 +1151,6 @@
         haptic("light");
       });
 
-      // fields autosave + time sorting
       const onField = (e) => {
         const el = e.target;
         const field = el?.dataset?.field;
@@ -1133,13 +1163,11 @@
 
         saveTasks(dateKey, tasks);
 
-        // local UI updates
         pillText.textContent = timeLabel(t);
         const cleanTitle = (t.title || "").trim() || "Без названия";
         title.textContent = cleanTitle;
         bigTitle.textContent = cleanTitle;
 
-        // if time changed -> sort + reorder DOM
         if(field === "start" || field === "end"){
           sortTasksInPlace(tasks);
           saveTasks(dateKey, tasks);
@@ -1170,7 +1198,6 @@
       }
     }
 
-    // buttons
     backBtn.addEventListener("click", () => {
       window.location.href = "calendar.html";
     });
@@ -1234,7 +1261,6 @@
       tg.sendData(JSON.stringify(payload));
     });
 
-    // init
     render();
   })();
   </script>
