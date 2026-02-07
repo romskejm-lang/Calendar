@@ -35,7 +35,7 @@
       justify-content:center;
       padding:18px;
 
-      overflow:hidden; /* FIX: скролл только внутри стекла */
+      overflow:hidden;
 
       background:
         radial-gradient(900px 520px at 15% 10%, rgba(var(--lime), .16), transparent 58%),
@@ -46,7 +46,6 @@
 
     .wrap{ width:min(720px, 100%); }
 
-    /* === OUTER GLASS (как календарь) === */
     .glass{
       position:relative;
       border-radius: var(--radius);
@@ -60,10 +59,10 @@
       backdrop-filter: blur(30px) saturate(190%) contrast(112%);
       -webkit-backdrop-filter: blur(30px) saturate(190%) contrast(112%);
 
-      max-height: calc(100vh - 36px); /* FIX */
+      max-height: calc(100vh - 36px);
     }
     @supports (height: 100dvh){
-      .glass{ max-height: calc(100dvh - 36px); } /* FIX: новая единица, если поддерживается */
+      .glass{ max-height: calc(100dvh - 36px); }
     }
 
     .glass::before{
@@ -93,20 +92,20 @@
       position:relative;
       padding:18px;
 
-      max-height: calc(100vh - 36px); /* FIX */
-      overflow-y:auto;                /* FIX */
-      overflow-x:hidden;              /* FIX */
-      -webkit-overflow-scrolling: touch; /* FIX */
-      overscroll-behavior: contain;      /* FIX */
+      max-height: calc(100vh - 36px);
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
 
-      display:flex;                  /* FIX */
-      flex-direction:column;         /* FIX */
+      display:flex;
+      flex-direction:column;
 
-      scrollbar-width:none;          /* FIX */
+      scrollbar-width:none;
     }
-    .inner::-webkit-scrollbar{ width:0; height:0; } /* FIX */
+    .inner::-webkit-scrollbar{ width:0; height:0; }
     @supports (height: 100dvh){
-      .inner{ max-height: calc(100dvh - 36px); } /* FIX */
+      .inner{ max-height: calc(100dvh - 36px); }
     }
 
     .inner::before{
@@ -126,7 +125,6 @@
 
     .top, .bar, .list{ position:relative; z-index:1; }
 
-    /* FIX: шапка не улетает */
     .stickyHeader{
       position: sticky;
       top: 0;
@@ -141,7 +139,6 @@
       margin-bottom: 6px;
     }
 
-    /* === TOP BAR === */
     .top{
       display:flex;
       align-items:center;
@@ -262,7 +259,6 @@
         0 10px 26px rgba(15,23,42,.10);
     }
 
-    /* === BAR under header === */
     .bar{
       display:flex;
       align-items:center;
@@ -279,7 +275,6 @@
       user-select:none;
     }
 
-    /* === TASK LIST === */
     .list{
       display:flex;
       flex-direction:column;
@@ -312,7 +307,7 @@
       -webkit-tap-highlight-color: transparent;
       will-change: transform;
 
-      scroll-margin-top: 130px; /* FIX: чтобы карточку не прятало под sticky */
+      scroll-margin-top: 130px;
     }
 
     .task::before{
@@ -409,7 +404,6 @@
       user-select:none;
     }
 
-    /* priority dot */
     .dot{
       width:10px; height:10px;
       border-radius:999px;
@@ -420,10 +414,10 @@
       border: 1px solid rgba(15,23,42,.10);
       flex:0 0 auto;
     }
-    .dot.green{  background:#22c55e; }  /* низкий */
-    .dot.yellow{ background:#facc15; }  /* средний */
-    .dot.red{    background:#ef4444; }  /* высокий */
-    .dot.black{  background:#0f172a; }  /* очень высокий */
+    .dot.green{  background:#22c55e; }
+    .dot.yellow{ background:#facc15; }
+    .dot.red{    background:#ef4444; }
+    .dot.black{  background:#0f172a; }
 
     .title{
       font-size:18px;
@@ -440,7 +434,6 @@
       text-decoration: line-through;
     }
 
-    /* === DETAILS (без лагучей max-height) === */
     .details{
       display:none;
       padding:0 14px 14px 14px;
@@ -551,10 +544,7 @@
     }
     .closeMini:active{ transform: translateY(0) scale(.98); }
 
-    /* Priority block under description */
-    .prioWrap{
-      margin-top:12px;
-    }
+    .prioWrap{ margin-top:12px; }
     .prioHeader{
       display:flex;
       align-items:center;
@@ -672,7 +662,6 @@
   <div class="wrap">
     <div class="glass">
       <div class="inner">
-        <!-- FIX: шапка sticky -->
         <div class="stickyHeader">
           <div class="top">
             <button class="iconBtn navCell" id="backBtn" aria-label="Назад">
@@ -684,17 +673,11 @@
             <div class="dateTitle" id="dateTitle">—</div>
 
             <div class="nav">
+              <!-- ОСТАВИЛИ ТОЛЬКО + -->
               <button class="iconBtn navCell" id="plusBtn" aria-label="Добавить">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 5v14"/>
                   <path d="M5 12h14"/>
-                </svg>
-              </button>
-
-              <button class="iconBtn navCell" id="sendBtn" aria-label="Отправить боту">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 2L11 13"/>
-                  <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
                 </svg>
               </button>
             </div>
@@ -750,10 +733,26 @@
       return String(val).replace(/["\\]/g, "\\$&");
     }
 
+    // защита для value="" и textarea
+    function escAttr(s){
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+    function escTextArea(s){
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
     const tg = window.Telegram?.WebApp;
     try{ tg?.ready(); tg?.expand(); } catch {}
 
     const STORE_KEY = "glass_tasks_v1";
+    const DIRTY_DAY_KEY = "glass_day_dirty_v1"; // { "YYYY-MM-DD": true }
 
     function todayKey(){
       const d = new Date();
@@ -780,9 +779,23 @@
       localStorage.setItem(STORE_KEY, JSON.stringify(obj));
     }
 
+    // сохраняем в localStorage БЕЗ UI-флагов (_dirty/_isNew)
+    function packForStore(arr){
+      return arr.map(t => ({
+        id: t.id,
+        title: (t.title ?? "").toString(),
+        desc: (t.desc ?? "").toString(),
+        start: (t.start ?? "").toString(),
+        end: (t.end ?? "").toString(),
+        done: !!t.done,
+        priority: normalizePriority(t.priority),
+        createdAt: Number.isFinite(+t.createdAt) ? +t.createdAt : Date.now()
+      }));
+    }
+
     function saveTasks(k, tasks){
       const all = loadAll();
-      all[k] = tasks;
+      all[k] = packForStore(tasks);
       saveAll(all);
     }
 
@@ -802,10 +815,14 @@
           end: (t.end ?? "").toString(),
           done: !!t.done,
           priority: normalizePriority(t.priority),
-          createdAt: Number.isFinite(+t.createdAt) ? +t.createdAt : Date.now()
+          createdAt: Number.isFinite(+t.createdAt) ? +t.createdAt : Date.now(),
+
+          // UI flags:
+          _dirty: false,   // изменено/не сохранено в БД
+          _isNew: false    // новая задача (после +)
         };
       }
-      return { id: safeUUID(), title:"", desc:"", start:"", end:"", done:false, priority:"green", createdAt: Date.now() };
+      return { id: safeUUID(), title:"", desc:"", start:"", end:"", done:false, priority:"green", createdAt: Date.now(), _dirty:false, _isNew:false };
     }
 
     function loadTasks(k){
@@ -875,6 +892,81 @@
       if(navigator.vibrate) navigator.vibrate(kind === "medium" ? 18 : 10);
     }
 
+    function loadDirtyDayMap(){
+      return safeParseJSON(localStorage.getItem(DIRTY_DAY_KEY), {}) || {};
+    }
+    function setDayDirtyFlag(dateKey, val){
+      const m = loadDirtyDayMap();
+      if(val) m[dateKey] = true;
+      else delete m[dateKey];
+      localStorage.setItem(DIRTY_DAY_KEY, JSON.stringify(m));
+    }
+    function isDayDirty(dateKey){
+      const m = loadDirtyDayMap();
+      return !!m[dateKey];
+    }
+
+    // === DB SAVE (через tg.sendData) ===
+    function buildPayload(reason){
+      return {
+        action: "save_day",
+        reason: reason || "manual",
+        date: dateKey,
+        tasks: tasks.map(t => ({
+          id: t.id,
+          title: t.title || "",
+          desc: t.desc || "",
+          start: t.start || "",
+          end: t.end || "",
+          done: !!t.done,
+          priority: normalizePriority(t.priority),
+          createdAt: t.createdAt || Date.now()
+        }))
+      };
+    }
+
+    function sendDayToDB(reason){
+      // localStorage всегда сохраняем
+      saveTasks(dateKey, tasks);
+
+      // Telegram -> бот -> БД
+      if(!tg || !tg.sendData) return false;
+      try{
+        tg.sendData(JSON.stringify(buildPayload(reason)));
+        return true;
+      }catch(e){
+        showErr("sendData error: " + (e?.message || e));
+        return false;
+      }
+    }
+
+    function clearDirtyFlagsAll(){
+      for(const t of tasks){
+        t._dirty = false;
+        t._isNew = false;
+      }
+      setDayDirtyFlag(dateKey, false);
+    }
+
+    // Автосохранение (если что-то менялось)
+    function autosaveIfNeeded(reason){
+      if(!isDayDirty(dateKey)) return;
+
+      // отправляем весь день одним пакетом
+      sendDayToDB("autosave:" + (reason || "unknown"));
+      clearDirtyFlagsAll();
+
+      // если открытая карточка есть — спрячем кнопки
+      if(openId){
+        const opened = listEl.querySelector(`.task[data-id="${escSel(openId)}"]`);
+        if(opened){
+          const save = opened.querySelector('button[data-action="save"]');
+          if(save) save.style.display = "none";
+        }
+      }
+    }
+
+    // === dateKey ===
     const qs = new URLSearchParams(location.search);
     const stateObj = safeParseJSON(localStorage.getItem("glass_calendar_state"), {}) || {};
     const candidate = qs.get("date") || stateObj?.selectedKey || todayKey();
@@ -886,7 +978,6 @@
 
     const backBtn = document.getElementById("backBtn");
     const plusBtn = document.getElementById("plusBtn");
-    const sendBtn = document.getElementById("sendBtn");
     const clearBtn = document.getElementById("clearBtn");
 
     let tasks = loadTasks(dateKey);
@@ -899,8 +990,9 @@
       hintEl.textContent = `${tasks.length} задач`;
     }
 
-    function closeCurrent(){
+    function closeCurrent(autosaveReason){
       if(!openId) return;
+      autosaveIfNeeded(autosaveReason || "close");
       const opened = listEl.querySelector(`.task[data-id="${escSel(openId)}"]`);
       opened?.classList.remove("open");
       openId = null;
@@ -929,7 +1021,10 @@
     function openCardById(id, focusTitle){
       const el = listEl.querySelector(`.task[data-id="${escSel(id)}"]`);
       if(!el) return;
-      closeCurrent();
+
+      // закрываем предыдущую (и автосейвим если нужно)
+      closeCurrent("switch");
+
       openId = id;
       el.classList.add("open");
       el.scrollIntoView({block:"nearest", behavior:"smooth"});
@@ -937,6 +1032,19 @@
         const input = el.querySelector('input[data-field="title"]');
         input?.focus?.();
       }
+    }
+
+    function shouldShowSave(t){
+      // требования:
+      // - новая задача после "+" => показываем кнопки (Save + Delete)
+      // - существующая без изменений => кнопок нет
+      // - существующая изменена => появляются кнопки (Save + Delete)
+      return !!(t._isNew || t._dirty);
+    }
+
+    function markTaskDirty(t){
+      if(!t._dirty) t._dirty = true;
+      setDayDirtyFlag(dateKey, true);
     }
 
     function createTaskCard(t){
@@ -1007,9 +1115,9 @@
       timeCard.innerHTML = `
         <div class="label">Время</div>
         <div class="rowTime">
-          <input class="timeInput" type="time" value="${(t.start || "")}" data-field="start" />
+          <input class="timeInput" type="time" value="${escAttr(t.start || "")}" data-field="start" />
           <span class="timeSep">—</span>
-          <input class="timeInput" type="time" value="${(t.end || "")}" data-field="end" />
+          <input class="timeInput" type="time" value="${escAttr(t.end || "")}" data-field="end" />
         </div>
       `;
 
@@ -1017,7 +1125,7 @@
       titleCard.className = "card";
       titleCard.innerHTML = `
         <div class="label">Название</div>
-        <input class="textInput" type="text" value="${(t.title || "")}" data-field="title" placeholder="Например: Учёба" />
+        <input class="textInput" type="text" value="${escAttr(t.title || "")}" data-field="title" placeholder="Например: Учёба" />
       `;
 
       grid.appendChild(timeCard);
@@ -1028,7 +1136,7 @@
       descWrap.innerHTML = `
         <div class="card">
           <div class="label">Описание</div>
-          <textarea class="textArea" data-field="desc" placeholder="Подробнее...">${(t.desc || "")}</textarea>
+          <textarea class="textArea" data-field="desc" placeholder="Подробнее...">${escTextArea(t.desc || "")}</textarea>
         </div>
       `;
 
@@ -1049,7 +1157,6 @@
 
       prioStatus.appendChild(prioDot);
       prioStatus.appendChild(prioText);
-
       prioHeader.appendChild(prioStatus);
 
       const prioBtns = document.createElement("div");
@@ -1072,15 +1179,30 @@
       prioWrap.appendChild(prioHeader);
       prioWrap.appendChild(prioBtns);
 
+      // === ACTIONS (Save + Delete), но показываем только когда надо ===
       const actions = document.createElement("div");
       actions.className = "actions";
+
+      const saveBtn = document.createElement("button");
+      saveBtn.className = "miniBtn navCell";
+      saveBtn.type = "button";
+      saveBtn.textContent = "Сохранить";
 
       const delBtn = document.createElement("button");
       delBtn.className = "miniBtn navCell";
       delBtn.type = "button";
       delBtn.textContent = "Удалить";
 
-      actions.appendChild(delBtn);
+	  saveBtn.dataset.action = "save";
+	  delBtn.dataset.action = "delete";
+
+	  actions.appendChild(saveBtn);
+	  actions.appendChild(delBtn);
+
+   	  // actions всегда видно, но Save — динамически
+	  actions.style.display = "flex";
+	  saveBtn.style.display = shouldShowSave(t) ? "inline-flex" : "none";
+
 
       details.appendChild(topRow);
       details.appendChild(grid);
@@ -1091,37 +1213,57 @@
       card.appendChild(head);
       card.appendChild(details);
 
+      function updateActionsVisibility(){
+        saveBtn.style.display = shouldShowSave(t) ? "inline-flex" : "none";
+      }
+
+      // DONE — тоже изменение -> в БД
       check.addEventListener("click", (e) => {
         e.stopPropagation();
         t.done = !t.done;
         card.classList.toggle("done", t.done);
+
+        markTaskDirty(t);
         saveTasks(dateKey, tasks);
+
+        // если задача открыта — покажем кнопки (т.к. изменили)
+        updateActionsVisibility();
+
         haptic("light");
       });
 
+      // OPEN/CLOSE card
       head.addEventListener("click", () => {
         if(openId === t.id){
-          card.classList.remove("open");
-          openId = null;
+          // закрываем текущую -> автосейв
+          closeCurrent("collapse");
           haptic("select");
           return;
         }
-        closeCurrent();
+
+        // переключение на другую -> автосейв старой/дня
+        closeCurrent("switch");
         openId = t.id;
         card.classList.add("open");
+
+        // при открытии — корректная видимость кнопок
+        updateActionsVisibility();
+
         haptic("select");
       });
 
       closeBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        card.classList.remove("open");
-        openId = null;
+        closeCurrent("close_x");
         haptic("light");
       });
 
+      // DELETE (после удаления — сразу отправляем день в БД)
       delBtn.addEventListener("click", (e) => {
         e.stopPropagation();
+
         tasks = tasks.filter(x => x.id !== t.id);
+        setDayDirtyFlag(dateKey, true); // день изменился (удаление)
         saveTasks(dateKey, tasks);
 
         if(openId === t.id) openId = null;
@@ -1129,37 +1271,74 @@
 
         setHint();
         if(tasks.length === 0) renderEmpty();
+
+        // автосейв сразу (удаление — это действие, лучше сразу фиксировать)
+        sendDayToDB("delete");
+        clearDirtyFlagsAll();
+
         haptic("medium");
       });
 
+      // SAVE (ручной)
+      saveBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        // ручное сохранение всего дня (проще для бэка)
+        sendDayToDB("manual_task_save");
+
+        // очищаем флаги — чтобы кнопки пропали
+        clearDirtyFlagsAll();
+        updateActionsVisibility();
+
+        haptic("medium");
+      });
+
+      // PRIORITY change -> dirty
       prioBtns.addEventListener("click", (e) => {
         const btn = e.target.closest("button[data-prio]");
         if(!btn) return;
         e.stopPropagation();
 
         const newP = normalizePriority(btn.dataset.prio);
-        t.priority = newP;
-        saveTasks(dateKey, tasks);
+        if(t.priority !== newP){
+          t.priority = newP;
 
-        pillDot.className = "dot " + newP;
-        prioDot.className = "dot " + newP;
-        prioText.textContent = `Приоритет: ${prioLabel(newP)}`;
-        for(const b of prioBtnsEls){
-          b.classList.toggle("active", b.dataset.prio === newP);
+          markTaskDirty(t);
+          saveTasks(dateKey, tasks);
+
+          pillDot.className = "dot " + newP;
+          prioDot.className = "dot " + newP;
+          prioText.textContent = `Приоритет: ${prioLabel(newP)}`;
+          for(const b of prioBtnsEls){
+            b.classList.toggle("active", b.dataset.prio === newP);
+          }
+
+          updateActionsVisibility();
         }
 
         haptic("light");
       });
 
+      // FIELDS input/change -> dirty + показываем Save
       const onField = (e) => {
         const el = e.target;
         const field = el?.dataset?.field;
         if(!field) return;
 
+        const prev = {
+          start: t.start, end: t.end, title: t.title, desc: t.desc
+        };
+
         if(field === "start") t.start = el.value;
         if(field === "end") t.end = el.value;
         if(field === "title") t.title = el.value;
         if(field === "desc") t.desc = el.value;
+
+        // если реально изменилось — dirty
+        if(prev[field] !== t[field]){
+          markTaskDirty(t);
+          updateActionsVisibility();
+        }
 
         saveTasks(dateKey, tasks);
 
@@ -1198,12 +1377,17 @@
       }
     }
 
+    // === MENU BUTTONS -> AUTOSAVE ===
     backBtn.addEventListener("click", () => {
+      autosaveIfNeeded("back");
       window.location.href = "calendar.html";
     });
 
     plusBtn.addEventListener("click", () => {
       haptic("light");
+
+      // если что-то было не сохранено — автосейв перед созданием новой
+      autosaveIfNeeded("plus");
 
       ensureNoEmptyState();
 
@@ -1217,6 +1401,11 @@
         priority: "green",
         createdAt: Date.now()
       });
+
+      // новая задача — кнопки должны быть сразу
+      nt._isNew = true;
+      nt._dirty = true;
+      setDayDirtyFlag(dateKey, true);
 
       tasks.push(nt);
       sortTasksInPlace(tasks);
@@ -1232,34 +1421,39 @@
 
     clearBtn.addEventListener("click", () => {
       if(tasks.length === 0) return;
+
+      // автосейв текущих изменений перед очисткой (на всякий)
+      autosaveIfNeeded("before_clear");
+
       const ok = confirm("Очистить все задачи на этот день?");
       if(!ok) return;
+
       tasks = [];
       openId = null;
+      setDayDirtyFlag(dateKey, true);
       saveTasks(dateKey, tasks);
       render();
+
+      // очистка = сразу фиксируем в БД
+      sendDayToDB("clear_all");
+      clearDirtyFlagsAll();
+
       haptic("medium");
     });
 
-    sendBtn.addEventListener("click", () => {
-      if(!tg) return;
-
-      const payload = {
-        action: "save_day",
-        date: dateKey,
-        tasks: tasks.map(t => ({
-          title: t.title || "",
-          desc: t.desc || "",
-          start: t.start || "",
-          end: t.end || "",
-          done: !!t.done,
-          priority: normalizePriority(t.priority)
-        }))
-      };
-
-      try { haptic("medium"); } catch {}
-      tg.sendData(JSON.stringify(payload));
+    // === автосейв при уходе/сворачивании вебвью ===
+    document.addEventListener("visibilitychange", () => {
+      if(document.visibilityState === "hidden"){
+        autosaveIfNeeded("visibility_hidden");
+      }
     });
+
+    // если вдруг была грязь на этом дне (например, перезагрузка)
+    if(isDayDirty(dateKey)){
+      // попробуем сразу отправить на бот (чтобы БД догнала)
+      sendDayToDB("resume_dirty_day");
+      clearDirtyFlagsAll();
+    }
 
     render();
   })();
